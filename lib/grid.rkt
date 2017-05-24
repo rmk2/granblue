@@ -41,23 +41,24 @@
 				  #:magna [magna 1]
 				  #:unknown [unknown 1]
 				  #:support [support 0]
-				  #:omega? [omega? #f]
+				  #:omega? [support-omega? #f]
 				  #:order [order 'desc])
   (->* () (#:normal real? #:magna real? #:unknown real? #:support real? #:omega? boolean? #:order (or/c 'asc 'desc)) (listof pair?))
   (sort
-   (map (lambda (label value)
+   (map (lambda (label value main-omega?)
 	  (cons label
-		(if omega?
-		    (* normal
-		       (grid-modifier ((percent->modifier magna) . support))
-		       unknown
-		       (grid-modifier (value)))
-		    (* normal
-		       magna
-		       unknown
-		       (grid-modifier (support value))))))
+		(cond [(and support-omega? main-omega?) ;; Support Omega + Omega
+		       (let ([omega-modifier (+ value support)])
+			 (* normal (grid-modifier ((percent->modifier magna) . omega-modifier)) unknown))]
+		      [(and (false? support-omega?) main-omega?) ;; Support Elemental + Omega
+		       (* normal (grid-modifier ((percent->modifier magna) . value)) unknown (grid-modifier (support)))]
+		      [(and support-omega? (false? main-omega?)) ;; Support Omega + Elemental
+		       (* normal (grid-modifier ((percent->modifier magna) . support)) unknown (grid-modifier (value)))]
+		      [else ;; Elemental + Elemental
+		       (* normal magna unknown (grid-modifier (support value)))])))
 	(list "Low 0*" "Low 3*/Mid 0*" "Low 4*" "Mid 3*/Mid 4*" "High 0*" "High 3*" "High 4*" "Omega 0*" "Omega 4*")
-	(list 40 50 60 80 120 130 140 50 100))
+	(list 40 50 60 80 120 130 140 50 100)
+	(list #f #f #f #f #f #f #f #t #t))
    (if (equal? order 'desc) >= <=)
    #:key cdr))
 
