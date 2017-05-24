@@ -40,7 +40,7 @@
 (define/contract (compare-summons #:normal [normal 1]
 				  #:magna [magna 1]
 				  #:unknown [unknown 1]
-				  #:support [support 1]
+				  #:support [support 0]
 				  #:omega? [omega? #f]
 				  #:order [order 'desc])
   (->* () (#:normal real? #:magna real? #:unknown real? #:support real? #:omega? boolean? #:order (or/c 'asc 'desc)) (listof pair?))
