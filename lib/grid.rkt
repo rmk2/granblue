@@ -10,7 +10,7 @@
 
 (define/contract (percent->modifier mod)
   (-> real? real?)
-  (- (* mod 100) 100))
+  (round (- (* mod 100) 100)))
 
 ;; Calculate damage modifier for a given weapon
 
@@ -37,21 +37,29 @@
 
 ;; Compare a given grid for all major damage summons
 
-(define/contract (compare-summons #:normal [normal 1] #:magna [magna 1] #:unknown [unknown 1] #:order [order 'desc])
-  (->* () (#:normal real? #:magna real? #:unknown real? #:order (and/c symbol? (or/c 'asc 'desc))) (listof pair?))
-  (let ([low0 (grid-modifier ((percent->modifier (* normal magna unknown))) (40))]
-	[low3 (grid-modifier ((percent->modifier (* normal magna unknown))) (50))]
-	[low4 (grid-modifier ((percent->modifier (* normal magna unknown))) (60))]
-	[mid3 (grid-modifier ((percent->modifier (* normal magna unknown))) (80))]
-	[high0 (grid-modifier ((percent->modifier (* normal magna unknown))) (120))]
-	[high4 (grid-modifier ((percent->modifier (* normal magna unknown))) (140))]
-	[omega0 (* normal (grid-modifier ((percent->modifier magna) . 50)) unknown)]
-	[omega4 (* normal (grid-modifier ((percent->modifier magna) . 100)) unknown)])
-    (sort (map (lambda (value label) (cons label value))
-	       (list low0 low3 low4 mid3 high0 high4 omega0 omega4)
-	       (list "Low 0*" "Low 3*/Mid 0*" "Low 4*" "Mid 3*/Mid 4*" "High 0*" "High 4*" "Omega 0*" "Omega 4*"))
-	  (if (equal? order 'desc) >= <=)
-	  #:key cdr)))
+(define/contract (compare-summons #:normal [normal 1]
+				  #:magna [magna 1]
+				  #:unknown [unknown 1]
+				  #:support [support 1]
+				  #:omega? [omega? #f]
+				  #:order [order 'desc])
+  (->* () (#:normal real? #:magna real? #:unknown real? #:support real? #:omega? boolean? #:order (or/c 'asc 'desc)) (listof pair?))
+  (sort
+   (map (lambda (label value)
+	  (cons label
+		(if omega?
+		    (* normal
+		       (grid-modifier ((percent->modifier magna) . support))
+		       unknown
+		       (grid-modifier (value)))
+		    (* normal
+		       magna
+		       unknown
+		       (grid-modifier (support value))))))
+	(list "Low 0*" "Low 3*/Mid 0*" "Low 4*" "Mid 3*/Mid 4*" "High 0*" "High 3*" "High 4*" "Omega 0*" "Omega 4*")
+	(list 40 50 60 80 120 130 140 50 100))
+   (if (equal? order 'desc) >= <=)
+   #:key cdr))
 
 ;; Shortcuts for common weapon types
 
