@@ -66,7 +66,11 @@
 
 (define/contract (unknown-large level)
   (-> (between/c 1 10) number?)
-  (weapon-modifier level #:base 5))
+  (weapon-modifier level #:base 5 #:modifier 1))
+
+(define/contract (unknown-massive level)
+  (-> (between/c 1 15) number?)
+  (weapon-modifier level #:base 8 #:modifier 1))
 
 (define/contract (magna-medium level)
   (-> (between/c 1 15) number?)
@@ -82,7 +86,7 @@
 
 (define/contract (normal-medium level)
   (-> (between/c 1 10) number?)
-  (weapon-modifier level #:base 2))
+  (weapon-modifier level #:base 2 #:modifier 0.5))
 
 (define/contract (normal-large level)
   (-> (between/c 1 15) number?)
