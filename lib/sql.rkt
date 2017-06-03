@@ -153,6 +153,9 @@
 			  (granblue-char-association-datetime x)))
 	    lst))
 
+(define (sql-granblue-get-char-associations [arg "%"])
+  (query-rows sqlc "SELECT db.*,cv.characterName,cv.rarityName,cv.elementName,cv.typeName,cv.raceName,cv.weaponName FROM accountDB AS db RIGHT JOIN accountCharAssociations AS ca ON db.accountID = ca.accountID LEFT JOIN characterView AS cv ON cv.characterID = ca.characterID WHERE display = 1 AND db.email LIKE ? OR db.accountID LIKE ?" arg arg))
+
 (define/contract (association-name->id lst #:type [type "character"])
   ((listof struct?) #:type string?  . -> . (listof struct?))
   (map (lambda (char)
@@ -174,6 +177,9 @@
 			  (granblue-summon-association-datetime x)
 			  (granblue-summon-association-datetime x)))
 	    lst))
+
+(define (sql-granblue-get-summon-associations [arg "%"])
+  (query-rows sqlc "SELECT db.*,sv.summonName,sv.rarityName,sv.elementName FROM accountDB AS db RIGHT JOIN accountSummonAssociations AS sa ON db.accountID = sa.accountID LEFT JOIN summonView AS sv ON sv.summonID = sa.summonID WHERE display = 1 AND db.email LIKE ? OR db.accountID LIKE ?" arg arg))
 
 ;; Initial SQL data
 
