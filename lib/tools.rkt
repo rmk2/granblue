@@ -11,6 +11,7 @@
 (define (dev-cleanup)
   (begin
     (query-exec sqlc "DROP TABLE IF EXISTS accountDB, characterDB, summonDB, elementDB, raceDB, rarityDB, typeDB, weaponDB")
+    (query-exec sqlc "DROP TABLE IF EXISTS accountCharAssociations, accountSummonAssociations")
     (query-exec sqlc "DROP VIEW IF EXISTS characterView, summonView")))
 
 (define (dev-setup)
