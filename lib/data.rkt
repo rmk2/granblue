@@ -41,7 +41,9 @@
 			   (cadr-guard (assoc 'alt input))
 			   (cadr-guard (second input))
 			   (cadr-guard (third input))
-			   (cadr-guard (fourth input))
+			   (if (>= (length input) 4)
+			       (cadr-guard (fourth input))
+			       "")
 			   rating))))
        (filter (lambda (x) (assoc 'alt x)) lst)))
 
