@@ -65,12 +65,16 @@
 ;; Shortcuts for common weapon types
 
 (define/contract (unknown-large level)
-  (-> (between/c 1 10) number?)
-  (weapon-modifier level #:base 5 #:modifier 1))
+  (-> (between/c 1 15) number?)
+  (weapon-modifier level #:base 5 #:modifier 0.6))
 
 (define/contract (unknown-massive level)
   (-> (between/c 1 15) number?)
   (weapon-modifier level #:base 8 #:modifier 1))
+
+(define/contract (magna-small level)
+  (-> (between/c 1 15) number?)
+  (weapon-modifier level #:base 0 #:modifier 0.4))
 
 (define/contract (magna-medium level)
   (-> (between/c 1 15) number?)
@@ -85,7 +89,7 @@
   (weapon-modifier level #:base 0 #:modifier 0.4))
 
 (define/contract (normal-medium level)
-  (-> (between/c 1 10) number?)
+  (-> (between/c 1 15) number?)
   (weapon-modifier level #:base 2 #:modifier 0.5))
 
 (define/contract (normal-large level)
