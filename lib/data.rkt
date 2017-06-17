@@ -12,7 +12,8 @@
 
 ;; Get character data from gbf.wiki
 
-(define (get-characters [address "https://gbf.wiki/SSR_Characters_List"])
+(define/contract (get-characters [address "https://gbf.wiki/SSR_Characters_List"])
+  (->* () (string?) (listof list?))
   (filter-not empty?
 	      (map (lambda (x)
 		     (remove-duplicates
@@ -23,7 +24,18 @@
 						    get-pure-port
 						    html->xexp)))))
 
-(define (prepare-characters lst #:rarity [rarity "SSR"] #:id [id 0] #:rating [rating 0])
+(define/contract (prepare-characters lst #:rarity [rarity "SSR"] #:id [id 0] #:rating [rating 0])
+  (->* ((listof list?))
+       (#:rarity string? #:id integer? #:rating integer?)
+       (listof (struct/dc granblue-character
+			  [id integer?]
+			  [name string?]
+			  [rarity string?]
+			  [element string?]
+			  [type string?]
+			  [race string?]
+			  [weapon string?]
+			  [rating integer?])))
   (define (cadr-guard arg) (cond [(false? arg) "NULL"]
 				 [(pair? arg) (cadr arg)]
 				 [else arg]))
@@ -49,7 +61,8 @@
 
 ;; Get summon data from gbf.wiki
 
-(define (get-summons [address "https://gbf.wiki/SSR_Summons_List"])
+(define/contract (get-summons [address "https://gbf.wiki/SSR_Summons_List"])
+  (->* () (string?) (listof list?))
   (filter-not empty?
 	      (map (lambda (x)
 		     (list (xexpr-path-first '(td a @ title) x)
@@ -59,7 +72,14 @@
 						    get-pure-port
 						    html->xexp)))))
 
-(define (prepare-summons lst #:rarity [rarity "SSR"] #:id [id 0])
+(define/contract (prepare-summons lst #:rarity [rarity "SSR"] #:id [id 0])
+  (->* ((listof list?))
+       (#:rarity string? #:id positive-integer?)
+       (listof (struct/dc granblue-summon
+			  [id integer?]
+			  [name string?]
+			  [rarity string?]
+			  [element string?])))
   (filter-map (lambda (x)
 		(match x
 		  [(list (list 'title (pregexp "^Delay|Drain|Damage Formula|SideM")) (list 'span _ element)) #f]
