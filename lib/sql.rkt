@@ -124,7 +124,7 @@
 	      (query-exec sqlc "INSERT IGNORE INTO summonDB VALUES (0, ?, ?, ?)"
 			  (granblue-summon-name x)
 			  (sql-granblue-query-id "rarity" (granblue-summon-rarity x))
-			  (sql-granblue-query-id "element" (granblue-summon-element x))))
+			  (string->number (granblue-summon-element x))))
 	    lst))
 
 (define (sql-granblue-create-summondb-view)
@@ -158,16 +158,21 @@
 
 (define/contract (association-name->id lst #:type [type "character"])
   ((listof struct?) #:type string?  . -> . (listof struct?))
-  (map (lambda (char)
-	 (granblue-char-association
-	  (granblue-char-association-account char)
-	  (sql-granblue-query-id "character" (granblue-char-association-character char))))
+  (map (lambda (entry)
+	 (cond [(equal? type "character")
+		(granblue-char-association
+		 (granblue-char-association-account entry)
+		 (sql-granblue-query-id "character" (granblue-char-association-character entry)))]
+	       [(equal? type "summon")
+		(granblue-summon-association
+		 (granblue-summon-association-account entry)
+		 (sql-granblue-query-id "summon" (granblue-summon-association-summon entry)))]))
        lst))
 
 (define (sql-granblue-create-summon-associations)
   (if (table-exists? sqlc "accountSummonAssociations")
       #t
-      (query-exec sqlc "CREATE TABLE accountSummonAssociations ( accountID SMALLINT NOT NULL, summonID SMALLINT NOT NULL, UNIQUE KEY ( accountID, summonID ))")))
+      (query-exec sqlc "CREATE TABLE accountSummonAssociations ( accountID SMALLINT NOT NULL, summonID SMALLINT NOT NULL, datetime DATETIME, UNIQUE KEY ( accountID, summonID ))")))
 
 (define (sql-granblue-update-summon-associations lst)
   (for-each (lambda (x)
